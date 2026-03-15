@@ -233,7 +233,7 @@ if (typeof lang === 'undefined') {
       valueTexts.push(checkmark)
       jsmaf.root.children.push(checkmark)
     } else {
-      let valueLabel: Image | jsmaf.Text = new jsmaf.Text()
+      let valueLabel: Image | jsmaf.Text
       if (configOption.key === 'jb_behavior') {
         if (useImageText) {
           valueLabel = new Image({
@@ -407,7 +407,7 @@ if (typeof lang === 'undefined') {
     prevButton = currentButton
   }
 
-  function updateValueText (index: number) {
+  function updateValueText(index: number) {
     const options = configOptions[index]
     const valueText = valueTexts[index]
     if (!options || !valueText) return
@@ -424,7 +424,7 @@ if (typeof lang === 'undefined') {
         }
       } else if (key === 'theme') {
         const themeIndex = availableThemes.indexOf(currentConfig.theme)
-        const displayIndex = themeIndex >= 0 ? themeIndex : 0
+        const displayIndex = themeIndex >= 0 ? themeIndex : 0;
 
         (valueText as jsmaf.Text).text = themeLabels[displayIndex] || themeLabels[0]!
       }
