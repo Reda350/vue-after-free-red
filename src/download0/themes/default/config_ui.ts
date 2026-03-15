@@ -259,7 +259,6 @@ if (typeof lang === 'undefined') {
         valueLabel.x = btnX + 250
         valueLabel.y = btnY + 28
         valueLabel.style = 'white'
-        
       }
       valueTexts.push(valueLabel)
       jsmaf.root.children.push(valueLabel)
@@ -407,7 +406,7 @@ if (typeof lang === 'undefined') {
     prevButton = currentButton
   }
 
-  function updateValueText(index: number) {
+  function updateValueText (index: number) {
     const options = configOptions[index]
     const valueText = valueTexts[index]
     if (!options || !valueText) return
