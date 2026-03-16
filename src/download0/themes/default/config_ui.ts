@@ -393,13 +393,20 @@ if (typeof lang === 'undefined') {
     updateHighlight()
   })
 
-  jsmaf.onKeyDown = function (keyCode) {
-    if (keyCode === 6 || keyCode === 5) { currentButton = (currentButton + 1) % buttons.length; updateHighlight() }
-    else if (keyCode === 4 || keyCode === 7) { currentButton = (currentButton - 1 + buttons.length) % buttons.length; updateHighlight() }
-    else if (keyCode === (jsmaf.circleIsAdvanceButton ? 13 : 14)) handleButtonPress()
-    else if (keyCode === (jsmaf.circleIsAdvanceButton ? 14 : 13)) {
-       saveConfig()
-       jsmaf.setTimeout(function () { debugging.restart() }, 100)
+  jsmaf.onKeyDown = function (code) {
+    if (code === 6 || code === 5) currentButton = (currentButton + 1) % buttons.length
+    else if (code === 4 || code === 7) currentButton = (currentButton - 1 + buttons.length) % buttons.length
+    else if (code === (jsmaf.circleIsAdvanceButton ? 13 : 14)) handleButtonPress()
+    else if (code === (jsmaf.circleIsAdvanceButton ? 14 : 13)) {
+       // --- التعديل هنا لضمان تفعيل اللغة ---
+       saveConfig();
+       log('Restarting to apply changes...');
+       jsmaf.setTimeout(function () { 
+         // هذا الأمر سيقوم بإعادة تشغيل الواجهة بالكامل 
+         // مما يجبر ملف languages.js على قراءة الإعدادات الجديدة
+         debugging.restart(); 
+       }, 200);
     }
+    updateHighlight()
   }
 })()
