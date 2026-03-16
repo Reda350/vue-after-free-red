@@ -24,7 +24,7 @@ export let useImageText = false
 export let textImageBase = ''
 
 // قراءة اللغة من الإعدادات لكسر لغة الجهاز
-let detectedLocale = jsmaf.locale || 'en'
+let detectedLocale = (typeof jsmaf !== 'undefined' && jsmaf.locale) ? jsmaf.locale : 'en'
 
 try {
   const xhr = new jsmaf.XMLHttpRequest()
@@ -37,10 +37,15 @@ try {
     }
   }
 } catch (e) {
-  log('Config not found, using system locale.')
+  // log('Config not found, using system locale.')
 }
 
-const IMAGE_TEXT_LOCALES = ['ar', 'ja', 'ko', 'zh']
+/** * تم حذف 'ar' من القائمة أدناه. 
+ * اللغات الموجودة في هذه القائمة ستستخدم صوراً بدل النصوص.
+ * بما أننا نريد نصاً عربياً، يجب ألا تكون 'ar' موجودة هنا.
+ */
+const IMAGE_TEXT_LOCALES = ['ja', 'ko', 'zh'] 
+
 if (IMAGE_TEXT_LOCALES.includes(detectedLocale)) {
   useImageText = true
   textImageBase = 'file:///../download0/img/text/' + detectedLocale + '/'
@@ -62,8 +67,8 @@ switch (detectedLocale) {
   case 'pt':
     // Portuguese
     lang.payloadMenu = 'Menu de Payloads'; lang.config = 'Configuracao'; lang.exit = 'Sair'
-    lang.autoClose = 'Fechar Auto'; lang.music = 'Musica'; lang.jbBehavior = 'Comportamento JB'
-    lang.theme = 'Tema'; lang.language = 'Idioma'; lang.xToGoBack = 'X para voltar'
+    lang.autoClose = 'Fechar Auto'; lang.music = 'Musica'; lang.jbBehavior = 'Comportamiento JB'
+    lang.theme = 'Tema'; lang.language = 'Idioma'; lang.xToGoBack = 'X para volver'
     break
 
   case 'fr':
@@ -109,11 +114,18 @@ switch (detectedLocale) {
     break
 
   case 'ar':
-    // Arabic
-    lang.jailbreak = 'كسر الحماية'; lang.payloadMenu = 'قائمة الحمولة'; lang.config = 'الاعدادات'
-    lang.exit = 'خروج'; lang.autoClose = 'اغلاق تلقائي'; lang.music = 'موسيقى'
-    lang.jbBehavior = 'نوع التهكير'; lang.theme = 'سمة'; lang.language = 'اللغة'
-    lang.xToGoBack = 'X للرجوع'; lang.oToGoBack = 'O للرجوع'
+    // Arabic - سيتم تفعيل هذه النصوص الآن بشكل صحيح
+    lang.jailbreak = 'كسر الحماية'; 
+    lang.payloadMenu = 'قائمة الحمولة'; 
+    lang.config = 'الإعدادات';
+    lang.exit = 'خروج'; 
+    lang.autoClose = 'إغلاق تلقائي'; 
+    lang.music = 'موسيقى';
+    lang.jbBehavior = 'نوع التهكير'; 
+    lang.theme = 'السمة'; 
+    lang.language = 'اللغة';
+    lang.xToGoBack = 'X للرجوع'; 
+    lang.oToGoBack = 'O للرجوع'
     break
 
   case 'ja':
@@ -141,4 +153,4 @@ switch (detectedLocale) {
     break
 }
 
-log('All languages loaded. Active: ' + detectedLocale)
+// log('All languages loaded. Active: ' + detectedLocale)
