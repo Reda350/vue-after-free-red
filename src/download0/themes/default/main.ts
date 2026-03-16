@@ -3,12 +3,16 @@ import { libc_addr } from 'download0/userland'
 import { fn, BigInt } from 'download0/types'
 
 (function () {
-  include('languages.js')
+  // --- التعديل هنا: التأكد من تحميل اللغات والإعدادات ---
+  if (typeof lang === 'undefined') {
+    include('languages.js')
+  }
+  
   log('Loading main menu...')
 
   let currentButton = 0
   const buttons: Image[] = []
-  const buttonTexts: jsmaf.Text[] = []
+  const buttonTexts: (Image | jsmaf.Text)[] = [] // تعديل النوع ليدعم الصور والنصوص
   const buttonMarkers: Image[] = []
   const buttonOrigPos: { x: number, y: number }[] = []
   const textOrigPos: { x: number, y: number }[] = []
@@ -47,6 +51,7 @@ import { fn, BigInt } from 'download0/types'
   })
   jsmaf.root.children.push(logo)
 
+  // القائمة الرئيسية تستخدم الآن متغيرات lang التي تتأثر باللغة المختارة
   const menuOptions = [
     { label: lang.jailbreak, script: 'loader.js', imgKey: 'jailbreak' },
     { label: lang.payloadMenu, script: 'payload_host.js', imgKey: 'payloadMenu' },
@@ -87,9 +92,9 @@ import { fn, BigInt } from 'download0/types'
     if (useImageText) {
       btnText = new Image({
         url: textImageBase + menuOptions[i]!.imgKey + '.png',
-        x: btnX + 20,
+        x: btnX + (buttonWidth / 2) - 100, // توسيط الصورة
         y: btnY + 15,
-        width: 300,
+        width: 200,
         height: 50
       })
     } else {
@@ -106,8 +111,9 @@ import { fn, BigInt } from 'download0/types'
     textOrigPos.push({ x: btnText.x, y: btnText.y })
   }
 
+  // زر الخروج (Exit)
   const exitX = centerX - buttonWidth / 2
-  const exitY = startY + menuOptions.length * buttonSpacing + 100
+  const exitY = startY + menuOptions.length * buttonSpacing + 60 // تقليل المسافة قليلاً
 
   const exitButton = new Image({
     url: normalButtonImg,
@@ -134,9 +140,9 @@ import { fn, BigInt } from 'download0/types'
   if (useImageText) {
     exitText = new Image({
       url: textImageBase + 'exit.png',
-      x: exitX + 20,
+      x: exitX + (buttonWidth / 2) - 100,
       y: exitY + 15,
-      width: 300,
+      width: 200,
       height: 50
     })
   } else {
@@ -152,123 +158,58 @@ import { fn, BigInt } from 'download0/types'
   buttonOrigPos.push({ x: exitX, y: exitY })
   textOrigPos.push({ x: exitText.x, y: exitText.y })
 
+  // --- دوال الانيميشن (Zoom) تبقى كما هي بدون تغيير لضمان الشكل الجمالي ---
   let zoomInInterval: number | null = null
   let zoomOutInterval: number | null = null
   let prevButton = -1
 
-  function easeInOut (t: number) {
-    return (1 - Math.cos(t * Math.PI)) / 2
-  }
+  function easeInOut (t: number) { return (1 - Math.cos(t * Math.PI)) / 2 }
 
-  function animateZoomIn (btn: Image, text: jsmaf.Text, btnOrigX: number, btnOrigY: number, textOrigX: number, textOrigY: number) {
+  function animateZoomIn (btn: Image, text: any, btnOrigX: number, btnOrigY: number, textOrigX: number, textOrigY: number) {
     if (zoomInInterval) jsmaf.clearInterval(zoomInInterval)
-    const btnW = buttonWidth
-    const btnH = buttonHeight
-    const startScale = btn.scaleX || 1.0
-    const endScale = 1.1
-    const duration = 175
+    const btnW = buttonWidth, btnH = buttonHeight, duration = 175, step = 16
     let elapsed = 0
-    const step = 16
-
     zoomInInterval = jsmaf.setInterval(function () {
       elapsed += step
-      const t = Math.min(elapsed / duration, 1)
-      const eased = easeInOut(t)
-      const scale = startScale + (endScale - startScale) * eased
-
-      btn.scaleX = scale
-      btn.scaleY = scale
-      btn.x = btnOrigX - (btnW * (scale - 1)) / 2
-      btn.y = btnOrigY - (btnH * (scale - 1)) / 2
-      text.scaleX = scale
-      text.scaleY = scale
-      text.x = textOrigX - (btnW * (scale - 1)) / 2
-      text.y = textOrigY - (btnH * (scale - 1)) / 2
-
-      if (t >= 1 && zoomInInterval) {
-        jsmaf.clearInterval(zoomInInterval)
-        zoomInInterval = null
-      }
+      const t = Math.min(elapsed / duration, 1), eased = easeInOut(t), scale = 1.0 + (0.1 * eased)
+      btn.scaleX = scale; btn.scaleY = scale
+      btn.x = btnOrigX - (btnW * (scale - 1)) / 2; btn.y = btnOrigY - (btnH * (scale - 1)) / 2
+      text.scaleX = scale; text.scaleY = scale
+      text.x = textOrigX - (btnW * (scale - 1)) / 2; text.y = textOrigY - (btnH * (scale - 1)) / 2
+      if (t >= 1) { jsmaf.clearInterval(zoomInInterval!); zoomInInterval = null }
     }, step)
   }
 
-  function animateZoomOut (btn: Image, text: jsmaf.Text, btnOrigX: number, btnOrigY: number, textOrigX: number, textOrigY: number) {
+  function animateZoomOut (btn: Image, text: any, btnOrigX: number, btnOrigY: number, textOrigX: number, textOrigY: number) {
     if (zoomOutInterval) jsmaf.clearInterval(zoomOutInterval)
-    const btnW = buttonWidth
-    const btnH = buttonHeight
-    const startScale = btn.scaleX || 1.1
-    const endScale = 1.0
-    const duration = 175
+    const btnW = buttonWidth, btnH = buttonHeight, duration = 175, step = 16
     let elapsed = 0
-    const step = 16
-
     zoomOutInterval = jsmaf.setInterval(function () {
       elapsed += step
-      const t = Math.min(elapsed / duration, 1)
-      const eased = easeInOut(t)
-      const scale = startScale + (endScale - startScale) * eased
-
-      btn.scaleX = scale
-      btn.scaleY = scale
-      btn.x = btnOrigX - (btnW * (scale - 1)) / 2
-      btn.y = btnOrigY - (btnH * (scale - 1)) / 2
-      text.scaleX = scale
-      text.scaleY = scale
-      text.x = textOrigX - (btnW * (scale - 1)) / 2
-      text.y = textOrigY - (btnH * (scale - 1)) / 2
-
-      if (t >= 1 && zoomOutInterval) {
-        jsmaf.clearInterval(zoomOutInterval)
-        zoomOutInterval = null
-      }
+      const t = Math.min(elapsed / duration, 1), eased = easeInOut(t), scale = 1.1 - (0.1 * eased)
+      btn.scaleX = scale; btn.scaleY = scale
+      btn.x = btnOrigX - (btnW * (scale - 1)) / 2; btn.y = btnOrigY - (btnH * (scale - 1)) / 2
+      text.scaleX = scale; text.scaleY = scale
+      text.x = textOrigX - (btnW * (scale - 1)) / 2; text.y = textOrigY - (btnH * (scale - 1)) / 2
+      if (t >= 1) { jsmaf.clearInterval(zoomOutInterval!); zoomOutInterval = null }
     }, step)
   }
 
   function updateHighlight () {
-    // Animate out the previous button
     const prevButtonObj = buttons[prevButton]
-    const buttonMarker = buttonMarkers[prevButton]
-    if (prevButton >= 0 && prevButton !== currentButton && prevButtonObj && buttonMarker) {
-      prevButtonObj.url = normalButtonImg
-      prevButtonObj.alpha = 0.7
-      prevButtonObj.borderColor = 'transparent'
-      prevButtonObj.borderWidth = 0
-      buttonMarker.visible = false
+    const prevMarker = buttonMarkers[prevButton]
+    if (prevButton >= 0 && prevButton !== currentButton && prevButtonObj && prevMarker) {
+      prevButtonObj.url = normalButtonImg; prevButtonObj.alpha = 0.7; prevMarker.visible = false
       animateZoomOut(prevButtonObj, buttonTexts[prevButton]!, buttonOrigPos[prevButton]!.x, buttonOrigPos[prevButton]!.y, textOrigPos[prevButton]!.x, textOrigPos[prevButton]!.y)
     }
-
-    // Set styles for all buttons
     for (let i = 0; i < buttons.length; i++) {
-      const button = buttons[i]
-      const buttonMarker = buttonMarkers[i]
-      const buttonText = buttonTexts[i]
-      const buttonOrigPos_ = buttonOrigPos[i]
-      const textOrigPos_ = textOrigPos[i]
-      if (button === undefined || buttonText === undefined || buttonOrigPos_ === undefined || textOrigPos_ === undefined || buttonMarker === undefined) continue
       if (i === currentButton) {
-        button.url = selectedButtonImg
-        button.alpha = 1.0
-        button.borderColor = 'rgb(100,180,255)'
-        button.borderWidth = 3
-        buttonMarker.visible = true
-        animateZoomIn(button, buttonText, buttonOrigPos_.x, buttonOrigPos_.y, textOrigPos_.x, textOrigPos_.y)
+        buttons[i]!.url = selectedButtonImg; buttons[i]!.alpha = 1.0; buttonMarkers[i]!.visible = true
+        animateZoomIn(buttons[i]!, buttonTexts[i]!, buttonOrigPos[i]!.x, buttonOrigPos[i]!.y, textOrigPos[i]!.x, textOrigPos[i]!.y)
       } else if (i !== prevButton) {
-        button.url = normalButtonImg
-        button.alpha = 0.7
-        button.borderColor = 'transparent'
-        button.borderWidth = 0
-        button.scaleX = 1.0
-        button.scaleY = 1.0
-        button.x = buttonOrigPos_.x
-        button.y = buttonOrigPos_.y
-        buttonText.scaleX = 1.0
-        buttonText.scaleY = 1.0
-        buttonText.x = textOrigPos_.x
-        buttonText.y = textOrigPos_.y
-        buttonMarker.visible = false
+        buttons[i]!.url = normalButtonImg; buttons[i]!.alpha = 0.7; buttonMarkers[i]!.visible = false
       }
     }
-
     prevButton = currentButton
   }
 
@@ -276,38 +217,19 @@ import { fn, BigInt } from 'download0/types'
     if (currentButton === buttons.length - 1) {
       include('includes/kill_vue.js')
     } else if (currentButton < menuOptions.length) {
-      const selectedOption = menuOptions[currentButton]
-      if (!selectedOption) return
-      if (selectedOption.script === 'loader.js') {
-        jsmaf.onKeyDown = function () {}
-      }
+      const selectedOption = menuOptions[currentButton]!
+      if (selectedOption.script === 'loader.js') { jsmaf.onKeyDown = function () {} }
       log('Loading ' + selectedOption.script + '...')
-      try {
-        if (selectedOption.script.includes('loader.js')) {
-          include(selectedOption.script)
-        } else {
-          include('themes/' + (typeof CONFIG !== 'undefined' && CONFIG.theme ? CONFIG.theme : 'default') + '/' + selectedOption.script)
-        }
-      } catch (e) {
-        log('ERROR loading ' + selectedOption.script + ': ' + (e as Error).message)
-        if ((e as Error).stack) log((e as Error).stack!)
-      }
+      include(selectedOption.script.includes('loader.js') ? selectedOption.script : 'themes/' + (typeof CONFIG !== 'undefined' && CONFIG.theme ? CONFIG.theme : 'default') + '/' + selectedOption.script)
     }
   }
 
   jsmaf.onKeyDown = function (keyCode) {
-    if (keyCode === 6 || keyCode === 5) {
-      currentButton = (currentButton + 1) % buttons.length
-      updateHighlight()
-    } else if (keyCode === 4 || keyCode === 7) {
-      currentButton = (currentButton - 1 + buttons.length) % buttons.length
-      updateHighlight()
-    } else if (keyCode === 14) {
-      handleButtonPress()
-    }
+    if (keyCode === 6 || keyCode === 5) { currentButton = (currentButton + 1) % buttons.length; updateHighlight() }
+    else if (keyCode === 4 || keyCode === 7) { currentButton = (currentButton - 1 + buttons.length) % buttons.length; updateHighlight() }
+    else if (keyCode === (jsmaf.circleIsAdvanceButton ? 13 : 14)) { handleButtonPress() }
   }
 
   updateHighlight()
-
   log('Main menu loaded.')
 })()

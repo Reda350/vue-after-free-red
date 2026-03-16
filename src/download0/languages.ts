@@ -15,6 +15,7 @@ export const lang: Record<string, string> = {
   jbBehaviorNetctrl: 'NetControl',
   jbBehaviorLapse: 'Lapse',
   theme: 'Theme',
+  language: 'Language', // المفتاح الجديد
   xToGoBack: 'X to go back',
   oToGoBack: 'O to go back'
 }
@@ -22,12 +23,25 @@ export const lang: Record<string, string> = {
 export let useImageText = false
 export let textImageBase = ''
 
-let detectedLocale = jsmaf.locale
-if (!detectedLocale) {
-  detectedLocale = 'ar'
+// --- التعديل الجوهري: جعل اختيار اللغة يتبع ملف الإعدادات أولاً ---
+let detectedLocale = jsmaf.locale || 'en'
+
+try {
+  const xhr = new jsmaf.XMLHttpRequest()
+  // نستخدم false ليكون الطلب متزامناً (Sync) لضمان تحميل اللغة قبل عرض الواجهة
+  xhr.open('GET', 'file:///../download0/config.json', false)
+  xhr.send()
+  if (xhr.status === 200 || xhr.status === 0) {
+    const configData = JSON.parse(xhr.responseText)
+    if (configData.config && configData.config.language) {
+      detectedLocale = configData.config.language
+    }
+  }
+} catch (e) {
+  log('Config not found or error, falling back to system locale.')
 }
 
-log('Detected locale: ' + detectedLocale)
+log('Current active locale: ' + detectedLocale)
 
 const IMAGE_TEXT_LOCALES = ['ar', 'ja', 'ko', 'zh']
 if (IMAGE_TEXT_LOCALES.includes(detectedLocale)) {
@@ -42,7 +56,6 @@ switch (detectedLocale) {
   case 'es-419':
   case 'es-MX':
   case 'es-AR':
-    // Spanish
     lang.jailbreak = 'Jailbreak'
     lang.payloadMenu = 'Menu de Payloads'
     lang.config = 'Configuracion'
@@ -56,12 +69,12 @@ switch (detectedLocale) {
     lang.jbBehaviorNetctrl = 'NetControl'
     lang.jbBehaviorLapse = 'Lapse'
     lang.theme = 'Tema'
+    lang.language = 'Idioma'
     lang.xToGoBack = 'X para volver'
     lang.oToGoBack = 'O para volver'
     break
 
   case 'pt':
-    // Portuguese
     lang.jailbreak = 'Jailbreak'
     lang.payloadMenu = 'Menu de Payloads'
     lang.config = 'Configuracao'
@@ -75,12 +88,12 @@ switch (detectedLocale) {
     lang.jbBehaviorNetctrl = 'NetControl'
     lang.jbBehaviorLapse = 'Lapse'
     lang.theme = 'Tema'
+    lang.language = 'Idioma'
     lang.xToGoBack = 'X para voltar'
     lang.oToGoBack = 'O para voltar'
     break
 
   case 'fr':
-    // French
     lang.jailbreak = 'Jailbreak'
     lang.payloadMenu = 'Menu Payload'
     lang.config = 'Configuration'
@@ -94,12 +107,12 @@ switch (detectedLocale) {
     lang.jbBehaviorNetctrl = 'NetControl'
     lang.jbBehaviorLapse = 'Lapse'
     lang.theme = 'Thème'
+    lang.language = 'Langue'
     lang.xToGoBack = 'X pour retourner'
     lang.oToGoBack = 'O pour retourner'
     break
 
   case 'de':
-    // German
     lang.jailbreak = 'Jailbreak'
     lang.payloadMenu = 'Payload Menu'
     lang.config = 'Einstellungen'
@@ -113,12 +126,12 @@ switch (detectedLocale) {
     lang.jbBehaviorNetctrl = 'NetControl'
     lang.jbBehaviorLapse = 'Lapse'
     lang.theme = 'Thema'
+    lang.language = 'Sprache'
     lang.xToGoBack = 'X für Zurueck'
     lang.oToGoBack = 'O für Zurueck'
     break
 
   case 'it':
-    // Italian
     lang.jailbreak = 'Jailbreak'
     lang.payloadMenu = 'Menu Payload'
     lang.config = 'Configurazione'
@@ -132,12 +145,12 @@ switch (detectedLocale) {
     lang.jbBehaviorNetctrl = 'NetControl'
     lang.jbBehaviorLapse = 'Lapse'
     lang.theme = 'Tema'
+    lang.language = 'Lingua'
     lang.xToGoBack = 'X per tornare indietro'
     lang.oToGoBack = 'O per tornare indietro'
     break
 
   case 'nl':
-    // Dutch
     lang.jailbreak = 'Jailbreak'
     lang.payloadMenu = 'Payload Menu'
     lang.config = 'Instellingen'
@@ -151,12 +164,12 @@ switch (detectedLocale) {
     lang.jbBehaviorNetctrl = 'NetControl'
     lang.jbBehaviorLapse = 'Lapse'
     lang.theme = 'Thema'
+    lang.language = 'Taal'
     lang.xToGoBack = 'X om terug te gaan'
     lang.oToGoBack = 'O om terug te gaan'
     break
 
   case 'pl':
-    // Polish
     lang.jailbreak = 'Jailbreak'
     lang.payloadMenu = 'Menu Payload'
     lang.config = 'Konfiguracja'
@@ -170,12 +183,12 @@ switch (detectedLocale) {
     lang.jbBehaviorNetctrl = 'NetControl'
     lang.jbBehaviorLapse = 'Lapse'
     lang.theme = 'Motyw'
+    lang.language = 'Język'
     lang.xToGoBack = 'X aby wrocic'
     lang.oToGoBack = 'O aby wrocic'
     break
 
   case 'tr':
-    // Turkish
     lang.jailbreak = 'Jailbreak'
     lang.payloadMenu = 'Payload Menusu'
     lang.config = 'Ayarlar'
@@ -189,12 +202,12 @@ switch (detectedLocale) {
     lang.jbBehaviorNetctrl = 'NetControl'
     lang.jbBehaviorLapse = 'Lapse'
     lang.theme = 'Tema'
+    lang.language = 'Dil'
     lang.xToGoBack = 'Geri gitmek icin X'
     lang.oToGoBack = 'Geri gitmek icin O'
     break
 
   case 'ar':
-    // Arabic
     lang.jailbreak = 'كسر الحماية'
     lang.payloadMenu = 'قائمة الحمولة'
     lang.config = 'الاعدادات'
@@ -208,12 +221,12 @@ switch (detectedLocale) {
     lang.jbBehaviorNetctrl = 'NetControl'
     lang.jbBehaviorLapse = 'Lapse'
     lang.theme = 'سمة'
+    lang.language = 'اللغة'
     lang.xToGoBack = 'X للرجوع'
     lang.oToGoBack = 'O للرجوع'
     break
 
   case 'ja':
-    // Japanese
     lang.jailbreak = '脱獄'
     lang.payloadMenu = 'ペイロードメニュー'
     lang.config = '設定'
@@ -227,12 +240,12 @@ switch (detectedLocale) {
     lang.jbBehaviorNetctrl = 'NetControl'
     lang.jbBehaviorLapse = 'Lapse'
     lang.theme = 'テーマ'
+    lang.language = '言語'
     lang.xToGoBack = 'Xで戻る'
     lang.oToGoBack = 'Oで戻る'
     break
 
   case 'ko':
-    // Korean
     lang.jailbreak = '탈옥'
     lang.payloadMenu = '페이로드 메뉴'
     lang.config = '설정'
@@ -246,12 +259,12 @@ switch (detectedLocale) {
     lang.jbBehaviorNetctrl = 'NetControl'
     lang.jbBehaviorLapse = 'Lapse'
     lang.theme = '테마'
+    lang.language = '언어'
     lang.xToGoBack = 'X로 뒤로 가기'
     lang.oToGoBack = 'O로 뒤로 가기'
     break
 
   case 'zh':
-    // Chinese
     lang.jailbreak = '越狱'
     lang.payloadMenu = '载荷菜单'
     lang.config = '设置'
@@ -265,14 +278,14 @@ switch (detectedLocale) {
     lang.jbBehaviorNetctrl = 'NetControl'
     lang.jbBehaviorLapse = 'Lapse'
     lang.theme = '主题'
+    lang.language = '语言'
     lang.xToGoBack = '按 X 返回'
     lang.oToGoBack = '按 O 返回'
     break
 
-  case 'ar':
   default:
-    // English (default) which is already set
+    // English (already set at the top)
     break
 }
 
-log('Language loaded: ' + detectedLocale)
+log('Language logic fully applied: ' + detectedLocale)
