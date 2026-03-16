@@ -269,7 +269,7 @@ switch (detectedLocale) {
     lang.oToGoBack = '按 O 返回'
     break
 
-  case 'en':
+  case 'ar':
   default:
     // English (default) which is already set
     break
